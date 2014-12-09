@@ -1,7 +1,7 @@
 class Api::TasksController < Api::BaseController
 
   def index
-    render json: Task.all
+    render json: Task.order(:priority)
   end
 
 
@@ -23,7 +23,7 @@ class Api::TasksController < Api::BaseController
   private
 
   def safe_params
-    params.require(:task).permit(:description, :priority, :completed, :due_date)
+    params.require(:task).permit(:description, :target_priority, :completed, :due_date)
   end
 
 end

@@ -1,39 +1,35 @@
-angular.module('todoApp').controller "IndexController", ($scope, $timeout, $routeParams, $location, Task) ->
+angular.module('todoApp').controller "IndexController", ($scope, $timeout, $routeParams, Task) ->
   $scope.sortMethod = 'priority'
   $scope.sortableEnabled = true
 
   $scope.init = ->
-    @tasksService = new Task(serverErrorHandler)
-    $scope.tasks = @tasksService.all()
+    @taskService = new Task($routeParams, serverErrorHandler)
+    $scope.tasks = @taskService.all()
 
   $scope.addTask = ->
     raisePriorities()
-    task = @tasksService.create(description: $scope.taskDescription)
+    task = @taskService.create(description: $scope.taskDescription)
     task.priority = 1
     $scope.tasks.unshift(task)
     $scope.taskDescription = ""
 
   $scope.deleteTask = (task) ->
     lowerPrioritiesBelow(task)
-    @tasksService.delete(task)
+    @taskService.delete(task)
     $scope.tasks.splice($scope.tasks.indexOf(task), 1)
 
   $scope.toggleTask = (task) ->
-    @tasksService.update(task, completed: task.completed)
-
-  $scope.toggleTask = (task) ->
-    @tasksService.update(task, completed: task.completed)
+    @taskService.update(task, completed: task.completed)
 
   $scope.taskEdited = (task) ->
-    @tasksService.update(task, description: task.description)
+    @taskService.update(task, description: task.description)
 
   $scope.dueDatePicked = (task) ->
-    @tasksService.update(task, due_date: task.due_date)
+    @taskService.update(task, due_date: task.due_date)
 
   $scope.priorityChanged = (task) ->
-    @tasksService.update(task, priority: task.priority)
+    @taskService.update(task, target_priority: task.priority)
     updatePriorities()
-
 
   $scope.sortableOptions =
     update: (e, ui) ->
@@ -53,8 +49,7 @@ angular.module('todoApp').controller "IndexController", ($scope, $timeout, $rout
       $scope.sortableEnabled = false
 
   $scope.dueDateNullLast = (task) ->
-    task.due_date ? '3999-12-31'
-
+    task.due_date ? '2999-12-31'
 
   serverErrorHandler = ->
     alert("There was a server error, please reload the page and try again.")
@@ -68,7 +63,6 @@ angular.module('todoApp').controller "IndexController", ($scope, $timeout, $rout
 
   raisePriorities = ->
     angular.forEach $scope.tasks, (t) -> t.priority += 1
-
 
   lowerPrioritiesBelow = (task) ->
     angular.forEach tasksBelow(task), (t) ->
